@@ -1,5 +1,59 @@
 
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.api.AssetManager;
+import com.day.cq.dam.commons.util.DamUtil;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.SlingException;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
+import java.util.Calendar;
+
+@Component(service = Runnable.class)
+public class MultimediaSetGenerator implements Runnable {
+
+    @Reference
+    private ResourceResolverFactory resourceResolverFactory;
+
+    @Override
+    public void run() {
+        ResourceResolver resourceResolver = null;
+        try {
+            // Authenticate and get a resource resolver
+            resourceResolver = resourceResolverFactory.getServiceResourceResolver(null);
+
+            // Get the asset manager
+            AssetManager assetManager = resourceResolver.adaptTo(AssetManager.class);
+
+            // Get assets from a folder
+            String sourceFolder = "/content/dam/myfolder";
+            Resource folderResource = resourceResolver.getResource(sourceFolder);
+            if (folderResource != null) {
+                for (Resource assetResource : folderResource.getChildren()) {
+                    Asset asset = DamUtil.resolveToAsset(assetResource);
+
+                    // Create a folder for each multimedia set based on asset name and last modified
+                    String multimediaSetPath = "/content/dam/my-multimedia-sets/"
+                            + asset.getName().replace(".", "_") + "_" + asset.getLastModified().getTimeInMillis();
+                    Resource multimediaSetResource = assetManager.createAsset(multimediaSetPath, null, null, true);
+
+                    // Add the asset to the multimedia set
+                    assetManager.createAsset(multimediaSetResource, asset.getName(), asset.getOriginal().getStream(), null);
+                }
+            }
+        } catch (Exception e) {
+            // Handle exceptions
+            e.printStackTrace();
+        } finally {
+            // Close the resource resolver
+            if (resourceResolver != null && resourceResolver.isLive()) {
+                resourceResolver.close();
+            }
+        }
+    }
+}
 
 
 http://20.186.115.47:4502/is/image/TractorSupplyCompanyDev/mset_1752843?req=exists&cache=off&_=1692038320027
