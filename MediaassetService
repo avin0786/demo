@@ -1,0 +1,153 @@
+Component (service = MediaAssetService.class)
+
+public class MediaAssetService {
+
+1 usage
+
+@Reference
+
+private QueryBuilder queryBuilder;
+
+2 usages
+
+private String environmentName = "Tractor SupplycompanyģA";
+
+1Usaoe
+
+private String productPath = "/content/dam/tsc/product"; 2 usaoes
+
+private String mixNediaPath = "/content/dam/tsc/mixmedia";
+
+1Usage new
+
+public Integer createNediaAsset ) {
+
+SystemServiceUtil util = new SystemServiceUtil () ;
+
+T
+
+tny (ResourceResolver resourceResolver = util.getResourceResolver (SystemServiceEnumerator . READ_SERVICE) ) { String skuld = 1752843";
+
+Nap<String, String> map = new HashMap<> () ;
+
+map.put("path", productPath);
+
+map.put("type", "dam: Asset");
+
+map.put("property. value", skuId) ;
+
+map.put ("property", "jcr:content/metadata/tsc: SKU");
+
+map.put("p.limit", "-1"):
+
+Query query = queryBuilder. createQuery (PredicateGroup . create (map), resourceResolver . adaptTo (Session .class) ) ; List<Hit> hits = query.getResult ().getHits(0;
+
+List<String> paths = new ArrayList<> ();
+
+for (Hit hit : hits){
+
+paths.add (hit.getPath ());
+
+if (null = resourceResolver) {
+
+String assethane = skuId +"_mset";
+
+String assetPath = mixHediaPath + assetName ;
+
+Resource resource = resourceResolver . getResaurce( pati: mixHediaPath + " * assetName) ;
+
+if (nulLL == resource) {
+
+Assethanager assethanager = resourceResolver . adaptIo (AssetHanager . class) ; Asset muLtimediaSetResource = assetHanager . createAsset (assetPath, is: nulL,
+
+mmeType: null,
+
+doSave: true);
+
+Calendar cal = new GregorianCalendar() ;
+
+Resource metadataRes = multimediaSetResource.adaptTo (Resource. class) . getChild( relPath: "jcr: content/metadata " ): Resource related = multimediaSetResource . adaptTo (Resource . class) .getChild ( relPath: "jcr: content/related") ; Resource jcr = multimediaSetResource . adaptTo (Resource .class) .getChild ( relPath: "jcr: content") ;
+
+updateJcrContent (jcr, cal);
+
+updateMetaData (metadataRes, assetName, cal);
+
+updateRelatedAsset (related, paths);
+
+resourceResolver.commit(); return 200;
+
+}catch (RepositoryException e) {
+
+throw new RuntimeException (e);
+
+} catch (PersistenceException e) {
+
+throw new RuntimeException (e) ;
+
+}
+
+return 508;
+
+I
+
+1 usage new
+
+private void updateRelatedAsset (ResoUrce related, List<String> paths) throws RepositoryException { Node node elated.adaptTo (Node .class);
+
+if (null != node){
+
+Node s7Set = node.addNode ( relPath: "s7Set". primaryNodeTypeName "nt:unstructured");
+
+s7Set.setProperty ("sling : resourceType", "sling/collection");
+
+Node slingHembers = s7Set.addNode( relPath: "sling:members", primaryNodeTypeName: "nt:unstructured"); String [] pathArray = new String[paths.size ()];
+
+slingHembers. setProperty ("sling: resources", paths.toArray(pathArray));
+
+for (String path : paths) {
+
+String fileName = path.substring (path.lastIndex0f( str:"/") + 1, path.length()); Node fileNameNode = slingMembers .addNode (fileName); fileNameNode. setProperty("sling;resource", path);
+
+
+private void updateJcrContent (Resource jcr, Calendar cal) {
+
+jcr.adaptTo (ModifiableValueMap. class) ;
+
+NodifiableValveNap modifiableValueMap
+
+modifiableValveNap.put (" dam:assetState", "processed"); modifiableValveNap.put ("dam: imageServerAsset" true); modifiableValveNap. put ("dam:lastS7SyncStatus""sUccess"); modifiableValveMap.put ("dam:lastS7Synced", cal); modifiableValveNap.put ("dam:s7damType", "MixedMediaSet"): modifiatbleVal veNap.put ( dam:scene7L.astPublished", cal); modifiable ValveNap.put ("jcr:lastModifiedBy","serviceUser"); modifiableValveNap.put ("jcr:lastModified", cal); modifiableValveNap. put ("status", "Finished");
+
+1usage new
+
+privete void updateMetaData (Resource metadataRes, String assetName, Calendar cal) { NodifiableValveNap modifiableValueMap = metadataRes.adaptTo (ModifiableValueMap.class); modifiatbleValueNap.put (" dam: scene7APIServer", "https://s7sps1apissl.scene7.com") ; modifiatbleValueNap.put (" dam : scene7CloudConfigPath,/conf/globalL/settings/cloudconfigs/dmscene7"); modifiatbleValueNap. put (" dam : scene7CompanyID", "c|237360");
+
+modifiatbleValueNap.put (" dam : scene7Domain", "https://tractorsupplyga.scene7.com/"); modifiableValueMap . put (" dam: scene7File", environmentName "+ assetName); modifiable ValueMap.put ("dam: scene7FileStatus", "PublishComplete");
+
+modifiableValueMap.put (" dam: scene7Folder", environmentName "/tsc/product/6/15/20/22/"); modifiab le Va lueMap. put (" dam: scene7ID", "a|1579841246");
+
+modifiab leValueMap.put(" dam :scene7LastModified", cal.getTime () .getTime () ); modifiableValueMap. put (" dam : scene7Name", assetName);
+
+I
+
+modifiab leValueMap.put (" dam :scene7PublishTimeStamp", cal); modifiableVa lueMap.put (" dam : scene7PublishedBy", "'serviceUser") ; modifiab leVa lueMap.put (" dam : scene7Type", "MediaSet") ;
+
+modifiab LeValueMap. put ("dc:format", "Multipart/Related; typemapplication/x-MixedMediaSet"); mOdifiab LeVa lueMap.put (" dc :modified", cal);
+
+modifiab LeValueMap.put (" dc: title", assetName) ;
+
+modifiableVaLuelap.put ("jcr:lastModified", cal);
+
+modifiabLeVa lueMap-put ("jcr:LastModifiedBy","serviceUser");
+
+Calendar cal2 F new GregorianCalendar0;
+
+Date date = new Date);
+
+date.setYear (date .getYear ) + 1);
+
+cal2.setTime (date);
+
+BodifiableValueMap.put("prism:expirationDate ", cal2); BdifiableValueMap. put("tsc@: asset Type", "MediaSet") ; BodifiabLeValueMap.put("tsc@: right sHolder", MTSC") ; BOdifiabLeValueHap.put ("tsc0 :right sUsage", "Fully Owned") ;
+
+
+
