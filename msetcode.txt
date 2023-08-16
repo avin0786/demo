@@ -1,0 +1,101 @@
+To achieve the operation of generating Mixed Media Sets (MSETs) only for the last modified assets within the last 24 hours, you can modify the Java model to include a date filter in the query. Here's an updated version of the Java model based on your requirement:
+
+```java
+package com.example.aem.core.models;
+
+import com.day.cq.dam.api.Asset;
+import com.day.cq.dam.api.AssetManager;
+import com.day.cq.dam.api.query.Query;
+import com.day.cq.dam.api.query.QueryBuilder;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.models.annotations.DefaultInjectionStrategy;
+import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.injectorspecific.SlingObject;
+
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Model(
+    adaptables = Resource.class,
+    defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL
+)
+public class MixedMediaSetsModel {
+
+    @SlingObject
+    private ResourceResolver resourceResolver;
+
+    @SlingObject
+    private AssetManager assetManager;
+
+    private String baseFolder;
+
+    private List<MixedMediaSet> msets = new ArrayList<>();
+
+    @PostConstruct
+    protected void init() {
+        if (baseFolder != null && !baseFolder.isEmpty()) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.HOUR, -24); // Calculate the date 24 hours ago
+            Date lastModifiedTime = calendar.getTime();
+
+            QueryBuilder queryBuilder = resourceResolver.adaptTo(QueryBuilder.class);
+
+            Map<String, String> map = queryBuilder.createQuery().path(baseFolder)
+                    .p("group.property").p("jcr:content/metadata/dc:title").group(true)
+                    .property("group.property").property("jcr:content/metadata/dc:format").propertyOperation("like")
+                    .propertyValue("group.property").propertyValue("%")
+                    .property("group.property").property("jcr:content/metadata/dc:lastModified").propertyOperation("ge")
+                    .propertyValue("group.property").propertyValue(lastModifiedTime)
+                    .build();
+
+            Query query = queryBuilder.createQuery(map);
+            List<Asset> assets = query.getResult().getResources()
+                    .stream()
+                    .map(resource -> assetManager.getAsset(resource))
+                    .collect(Collectors.toList());
+
+            // Process assets, grouping them into Mixed Media Sets
+            // ... (implement your asset grouping logic here)
+        }
+    }
+
+    public List<MixedMediaSet> getMsets() {
+        return msets;
+    }
+
+    public class MixedMediaSet {
+        private List<Asset> assets = new ArrayList<>();
+
+        public List<Asset> getAssets() {
+            return assets;
+        }
+    }
+}
+```
+
+In this version of the code, the `dc:lastModified` property is used in the query to filter assets modified in the last 24 hours. The `Calendar` class is used to calculate the date and time 24 hours ago from the current moment.
+
+Please make sure to test this code thoroughly and adjust it to your specific requirements and project structure. As always, referring to AEM documentation and collaborating with experienced AEM developers can help ensure the successful implementation of such customizations.
+
+
+
+<!-- /apps/myapp/components/mixedmediaset/mixedmediaset.html -->
+<sly data-sly-use.msets="${'com.example.aem.core.models.MixedMediaSetsModel' @ baseFolder='/content/dam/myassets'}">
+    <div class="mixed-media-sets">
+        <sly data-sly-repeat="${msets}" data-sly-unwrap>
+            <div class="mixed-media-set">
+                <sly data-sly-repeat="${mset.assets}" data-sly-unwrap>
+                    <div class="media-item">
+                        <img src="${asset.path}" alt="${asset.title}">
+                    </div>
+                </sly>
+            </div>
+        </sly>
+    </div>
+</sly>
