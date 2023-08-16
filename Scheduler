@@ -1,0 +1,166 @@
+@objectClassDefinition (name ="SimpleSchedulerConfiguration 0CD", description = "SimpleSchedulerConfiguration 0CD description"
+
+)
+
+public @interface MediaAssetConfiguration {
+
+3 usages new
+
+@AttributeDefìnition(
+
+name = "Scheduler name"
+
+description = "Scheduler name",
+
+type = AttributeType. STRING)
+
+String scheduler_name() default "practice";
+
+1/ cron job for every minute
+
+1 usage new*
+
+@AttributeDefinition(
+
+name = "Cron job expression
+
+I
+
+description = "Cron job expression"
+
+type = AttributeType. STRING)
+
+String scheduler_expression() default"0* ***M
+
+1 usace new *
+
+GAttributeDefinition(
+
+name = "Enable Scheduler"
+
+description = "Enable Scheduler",
+
+type = AttributeType.B0OLEAN) boolean enable_scheduler() default true;
+
+1 usage new
+
+GAttributeDefinition (
+
+name = "Concurrent Scheduler",
+
+description = "Concurrent Scheduler" type = AttributeType. B00LEAN) boolean concurrent_scheduler () default false;
+
+no usages new
+
+@AttributeDefinition(
+
+name = "Custom Property",
+
+description = "Custom Property" type = AttributeType.STRING) String customProperty () default "Test";
+
+
+
+
+
+
+
+
+
+
+
+
+
+@Component (service = MediaAssetScheduler.class, immediate true) aDesignate (ocd = NediaAssetConfiguration.class)
+
+public class MediaAssetScheduler implements Runnable {
+
+6 Usages
+
+private final Logger logger = LoggerFactory.gettogger (getClass () );
+
+3 Usages
+
+OReference
+
+private Scheduler scheduler;
+
+1 Usaoe
+
+OReference
+
+private NediaAssetService mediaAssetService;
+
+hew
+
+@ACtivate
+
+protected void activate (final MediaAssetConfiquration config) {
+
+logger.error (" MediaAssetScheduler activate method called");
+
+1 Execute this method to add scheduler. addScheduler (config);
+
+1/ Adc oLl configurations to Schedule a scheduler depending on name and expression. 2usage new
+
+public void addScheduler (MediaAssetConfiguration config){
+
+Logger.error ("Scheduler added successfully >>>>>>>
+
+")
+
+if (config.enable _scheduler )) {
+
+Scheduleûptions options = scheduler . EXPR (config.scheduler_expression()); options.name (config.scheduler_name ());
+
+options.cankunConcurrently (config. concurrent_scheduler));
+
+1/ Add scheduler to call depernding on option passed.
+
+schedulLer .schedule( job: this, options) ;
+
+Logger.error ("Scheduler added successfully name ='(}'", config. scheduler_name ()); }else {
+
+Logger.error ("MediaAssetScheduler disabled") ;
+
+// Custom method to deactivate or unschedule scheduler
+
+2 usages new*
+
+public void remove Scheduler (MediaAssetConfiguration config) { scheduler . unschedule (config. scheduler_name ());
+
+}
+
+1/ On deactivate component it will unschedule scheduler
+
+no usages new
+
+@Deactivate
+
+protected void deactivate (MediaAssetConfiguration config) { removeScheduler (config);
+
+}
+
+Lronove
+
+1/ On component modification change status wiltremo ve and add scheduler no usaces new*
+
+@Modified
+
+protected void modified (MediaAssetConfiguration config) {
+
+removeScheduler (config) ;
+
+addScheduler (config);
+
+1/ run( method will get call eveny minute
+
+new *
+
+@0verride
+
+public void run) {
+
+logger.error ("MediaAssetScheduler run >>>>>>");
+
+Integer success = mediaAssetService.createMediaAsset () ; Logger.error ("MediaAssetScheduler success >>>>>>>{}", success);
+
